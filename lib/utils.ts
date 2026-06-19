@@ -1,38 +1,41 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { OpenRouterModel, Model } from '@/types';
+import { OpenRouterV1Model, Model } from '@/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function transformModels(models: OpenRouterModel[]): Model[] {
+export function transformModels(models: OpenRouterV1Model[]): Model[] {
   return models.map((model) => {
     const nameParts = model.name.split(':');
     const company_name =
-      nameParts.length > 1 ? nameParts[0].trim() : (model.author || '').trim();
+      nameParts.length > 1
+        ? nameParts[0].trim()
+        : model.id.split('/')[0]?.trim() || '';
     const name =
       nameParts.length > 1
         ? nameParts.slice(1).join(':').trim()
         : model.name.trim();
 
-    const icon_url = model.endpoint.provider_info.icon?.url || '';
     return {
-      id: model.slug,
+      id: model.id.replace(/:free$/, ''),
       company_name,
-      name,
+      name: name.replace(/\s*\(free\)$/i, '').trim(),
       description: model.description,
-      updated_at: model.updated_at,
+      updated_at: new Date(model.created * 1000).toISOString(),
       context_length: model.context_length,
-      input_modalities: model.input_modalities,
-      output_modalities: model.output_modalities,
-      provider_name: model.endpoint.provider_info.displayName,
-      provider_display_name: model.endpoint.provider_display_name,
-      quantization: model.endpoint.quantization,
-      supports_reasoning: model.endpoint.supports_reasoning,
-      icon_url: icon_url.startsWith('http')
-        ? icon_url
-        : `https://openrouter.ai${icon_url}`,
+      input_modalities: model.architecture.input_modalities,
+      output_modalities: model.architecture.output_modalities,
+      provider_name: company_name,
+      provider_display_name: company_name,
+      quantization: '',
+      supports_reasoning:
+        Boolean(model.reasoning?.mandatory) ||
+        Boolean(model.reasoning?.default_enabled) ||
+        model.supported_parameters.includes('reasoning') ||
+        model.supported_parameters.includes('include_reasoning'),
+      icon_url: '',
     };
   });
 }

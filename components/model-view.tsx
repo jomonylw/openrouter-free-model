@@ -69,6 +69,7 @@ export function ModelView({ initialData }: ModelViewProps) {
       revalidateOnFocus: false, // 避免在窗口聚焦时自动重新验证
       revalidateOnReconnect: false, // 避免在网络重连时自动重新验证
     });
+  const models = useMemo(() => data?.models ?? [], [data?.models]);
 
   const {
     filterSortState,
@@ -81,7 +82,7 @@ export function ModelView({ initialData }: ModelViewProps) {
     filteredAndSortedModels,
     companyList,
     providerList,
-  } = useModelFilter(data?.models || []);
+  } = useModelFilter(models);
 
   const handleRefresh = () => {
     mutate();
@@ -90,8 +91,8 @@ export function ModelView({ initialData }: ModelViewProps) {
 
   const hasSelectedModels = selectedModelIds.size > 0;
   const selectedModels = useMemo(() => {
-    return data?.models.filter((model) => selectedModelIds.has(model.id)) || [];
-  }, [selectedModelIds, data?.models]);
+    return models.filter((model) => selectedModelIds.has(model.id));
+  }, [selectedModelIds, models]);
 
   const isAllSelected = useMemo(() => {
     const filteredCount = filteredAndSortedModels.length;

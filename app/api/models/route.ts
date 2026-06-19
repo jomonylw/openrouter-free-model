@@ -1,5 +1,4 @@
-import { ApiResponse } from '@/types';
-import { transformModels } from '@/lib/utils';
+import { getFreeModels } from '@/lib/models';
 
 /**
  * GET 请求处理函数
@@ -12,44 +11,11 @@ export async function GET() {
   const cacheControl = 'public, s-maxage=3600, stale-while-revalidate=86400';
 
   try {
-    // 向 OpenRouter API 发起请求
-    console.log('Fetching data from https://openrouter.ai/api');
-    const response = await fetch(
-      'https://openrouter.ai/api/frontend/models/find?max_price=0',
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          // 如果未来需要 API Key，可以在这里添加
-          // 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        },
-        // next: { revalidate: 43200 } // 也可以在这里设置，但使用 headers 更通用
-      },
-    );
-
-    // 检查响应状态
-    if (!response.ok) {
-      console.error(`API request failed with status ${response.status}`);
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch models from OpenRouter API' }),
-        {
-          status: response.status,
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': cacheControl,
-          },
-        },
-      );
-    }
-
-    // 解析 JSON 响应
-    const data: ApiResponse = await response.json();
-
-    // 提取模型列表并精简数据
-    const models = transformModels(data.data.models);
+    const data = await getFreeModels();
 
     // 返回成功响应
     return new Response(
-      JSON.stringify({ models, last_fetched: new Date().toISOString() }),
+      JSON.stringify(data),
       {
         status: 200,
         headers: {

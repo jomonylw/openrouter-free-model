@@ -1,4 +1,30 @@
 // 统一存放从 OpenRouter API 获取的原始模型数据结构
+export interface OpenRouterV1Model {
+  id: string;
+  canonical_slug: string;
+  hugging_face_id: string | null;
+  name: string;
+  created: number;
+  description: string;
+  context_length: number;
+  architecture: {
+    modality: string;
+    input_modalities: string[];
+    output_modalities: string[];
+    tokenizer: string;
+    instruct_type: string | null;
+  };
+  pricing: {
+    prompt: string;
+    completion: string;
+  };
+  supported_parameters: string[];
+  reasoning?: {
+    mandatory?: boolean;
+    default_enabled?: boolean;
+  } | null;
+}
+
 export interface OpenRouterModel {
   slug: string;
   hf_slug: string;
@@ -131,9 +157,7 @@ export interface Model {
 
 // API 响应的数据结构
 export interface ApiResponse {
-  data: {
-    models: OpenRouterModel[];
-  };
+  data: OpenRouterV1Model[];
 }
 
 export interface ModelsResponse {

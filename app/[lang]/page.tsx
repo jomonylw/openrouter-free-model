@@ -2,16 +2,11 @@ import React from 'react';
 import { ModelView } from '@/components/model-view';
 import { ModelsResponse } from '@/types';
 import { unstable_noStore as noStore } from 'next/cache';
+import { getFreeModels } from '@/lib/models';
 
 async function getModels(): Promise<ModelsResponse> {
   noStore();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/models`);
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch models');
-  }
-  return res.json();
+  return getFreeModels();
 }
 
 export default async function Home() {
